@@ -10,5 +10,4 @@
                  [digest "1.4.8"]
                  [gloss "0.2.6"]]
   :main pricepub.core
-  :aot [pricepub.core]
-  )
+  :aot [pricepub.core])

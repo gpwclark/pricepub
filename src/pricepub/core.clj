@@ -2,11 +2,8 @@
   (:gen-class)
   (:require [clojure.data.json :as json]
             [aleph.tcp :as tcp]
-            [clojure.edn :as edn]
-            [manifold.stream :as s]
-            [manifold.deferred :as d]
-            [digest :as digest])
-  (:gen-class))
+            [pricepub.socket :as socket]
+            [digest :as digest]))
 
 (def con-info {:host "127.0.0.1" :port 7878})
 
@@ -30,19 +27,12 @@
   [message n]
   (take n (repeat (get-message-otw-format message))))
 
-(defn send-socket
+(defn send-messages
   "[con-info messages]
   takes connection info and creates tcp connection to server and sends
   the list of messages (which are strings) to the server in one go."
   [con-info messages]
-  (let [con (aleph.tcp/client con-info)
-        fail (fn [x] (println "Failed to send messages:  " x))
-        fire (fn [x] (do (s/put-all! x messages) (identity x)))]
-    (-> con
-        (d/chain fire)
-        (deref)
-        (s/close!)
-        (d/catch Exception fail))))
+  (socket/put {:impl :socket :con-info con-info :messages messages}))
 
 (defn make-message
   "[topic payload]
@@ -75,10 +65,10 @@
   All payloads will be sent on the given topic to the server."
   [topic payloads]
   (let [messages (create-messages topic payloads)]
-    (send-socket con-info messages)))
+    (send-messages con-info messages)))
 
 (defn -main [topic & payloads]
-  (on-topic-send-payloads topic payloads))
+  (println (on-topic-send-payloads topic payloads)))
 
 ;; sample arguments
 ;;(on-topic-send-payloads "TOPIC" (list "I publish" "I batch" "but I do it" "sequentially"))
