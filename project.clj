@@ -5,9 +5,8 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/data.json "0.2.6"]
-                 [byte-streams "0.2.4"]
                  [aleph "0.4.6"]
                  [digest "1.4.8"]
-                 [gloss "0.2.6"]]
+                 [org.clojure/core.typed "0.2.77"]]
   :main pricepub.core
   :aot [pricepub.core])

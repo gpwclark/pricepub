@@ -32,7 +32,7 @@
   takes connection info and creates tcp connection to server and sends
   the list of messages (which are strings) to the server in one go."
   [con-info messages]
-  (socket/put {:impl :socket :con-info con-info :messages messages}))
+  (socket/put {:impl :pricepub :con-info con-info :messages messages}))
 
 (defn make-message
   "[topic payload]
@@ -68,7 +68,7 @@
     (send-messages con-info messages)))
 
 (defn -main [topic & payloads]
-  (println (on-topic-send-payloads topic payloads)))
+  (on-topic-send-payloads topic payloads))
 
 ;; sample arguments
-;;(on-topic-send-payloads "TOPIC" (list "I publish" "I batch" "but I do it" "sequentially"))
+(on-topic-send-payloads "TOPIC" (list "I publish" "I batch" "but I do it" "sequentially"))
