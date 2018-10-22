@@ -61,8 +61,7 @@
 
 (defn on-topic-send-payloads
   "[topic & payloads]
-  Currently (problematically might I add) a string, topic, and a set of payload strings.
-  All payloads will be sent on the given topic to the server."
+  Currently (problematically might I add) a string, topic, and a set of payload strings. All payloads will be sent on the given topic to the server."
   [topic payloads]
   (let [messages (create-messages topic payloads)]
     (send-messages con-info messages)))
@@ -71,4 +70,4 @@
   (on-topic-send-payloads topic payloads))
 
 ;; sample arguments
-(on-topic-send-payloads "TOPIC" (list "I publish" "I batch" "but I do it" "sequentially"))
+;;(on-topic-send-payloads "TOPIC" (list "aphid" "beachball" "curmudgeon" "dillweed"))
