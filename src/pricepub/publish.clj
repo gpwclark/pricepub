@@ -38,6 +38,19 @@
       (:status)
       (= "OK")))
 
+(defn read-from-sock
+  [socket-chan]
+  (let [read-buf (ByteBuffer/allocate 1024)]
+    (loop [read-buf read-buf bytes-read 0]
+      (if (<= bytes-read 0)
+        (recur read-buf (.read socket-chan read-buf))
+        (let [position (.position read-buf)
+              dst-array (byte-array position)
+              flip (.flip read-buf)
+              res-bytes (.get read-buf dst-array 0 position)
+              clear-buf (.clear read-buf)]
+          (String. dst-array))))))
+
 (defn write-to-once
   [con-info message]
   (let
@@ -47,15 +60,7 @@
           [write-buf (ByteBuffer/wrap (.getBytes message "UTF-8"))
             read-buf (ByteBuffer/allocate 1024)]
         (send-on-sock socket-chan message)
-        (loop [read-buf read-buf bytes-read 0]
-          (if (<= bytes-read 0)
-            (recur read-buf (.read socket-chan read-buf))
-            (let [position (.position read-buf)
-                  dst-array (byte-array position)
-                  flip (.flip read-buf)
-                  res-bytes (.get read-buf dst-array 0 position)
-                  clear-buf (.clear read-buf)]
-              (String. dst-array))))))))
+        (read-from-sock socket-chan)))))
 
 (defn send-message
   [con-info message]
