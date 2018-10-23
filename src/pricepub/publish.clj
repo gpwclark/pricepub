@@ -7,21 +7,24 @@
            (java.nio ByteBuffer)
            (java.nio.channels SocketChannel)))
 
+(defn send-on-sock
+  [socket-chan message]
+  (let [write-buf (ByteBuffer/wrap (.getBytes message "UTF-8"))]
+    (loop [write-buf write-buf]
+      (when (.hasRemaining write-buf)
+        (.write socket-chan write-buf)
+        (Thread/sleep 10)
+        (recur write-buf)))
+    (println (str "sent: " message))
+    (.clear write-buf)))
+
 (defn write-to
   [con-info messages]
   (let [socket-addr (InetSocketAddress. (:host con-info) (:port con-info))]
     (with-open [socket-chan (SocketChannel/open socket-addr)]
       (loop [messages messages]
        (when (not (nil? (first messages)))
-         (let
-             [buf (ByteBuffer/wrap (.getBytes (first messages) "UTF-8"))]
-           (loop [buf buf]
-             (when (.hasRemaining buf)
-                 (.write socket-chan buf)
-                 (Thread/sleep 10)
-                 (recur buf)))
-           (println "sent: " (str (first messages)))
-           (.clear buf))
+         (send-on-sock socket-chan (first messages))
          (recur (rest messages)))))))
 
 (defn send-messages
@@ -30,7 +33,10 @@
 
 (defn verify-response
   [res]
-  (= "OK" (:status (clojure.walk/keywordize-keys (json/read-str res)))))
+  (-> (json/read-str res)
+      (clojure.walk/keywordize-keys)
+      (:status)
+      (= "OK")))
 
 (defn write-to-once
   [con-info message]
@@ -40,22 +46,16 @@
       (let
           [write-buf (ByteBuffer/wrap (.getBytes message "UTF-8"))
             read-buf (ByteBuffer/allocate 1024)]
-        (loop [write-buf write-buf]
-          (when (.hasRemaining write-buf)
-            (.write socket-chan write-buf)
-            (Thread/sleep 10)
-            (recur write-buf)))
-        (println (str "sent: " message))
-        (.clear write-buf)
+        (send-on-sock socket-chan message)
         (loop [read-buf read-buf bytes-read 0]
           (if (<= bytes-read 0)
             (recur read-buf (.read socket-chan read-buf))
             (let [position (.position read-buf)
                   dst-array (byte-array position)
                   flip (.flip read-buf)
-                  res-bytes (.get read-buf dst-array 0 position)]
-              (String. dst-array))))
-        (.clear read-buf)))))
+                  res-bytes (.get read-buf dst-array 0 position)
+                  clear-buf (.clear read-buf)]
+              (String. dst-array))))))))
 
 (defn send-message
   [con-info message]
