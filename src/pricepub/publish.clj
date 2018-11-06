@@ -40,7 +40,7 @@
 
 (defn read-from-sock
   [socket-chan]
-  (let [read-buf (ByteBuffer/allocate 1024)]
+  (let [read-buf (ByteBuffer/allocate 8192)]
     (loop [read-buf read-buf bytes-read 0]
       (if (<= bytes-read 0)
         (recur read-buf (.read socket-chan read-buf))
@@ -56,11 +56,8 @@
   (let
     [socket-addr (InetSocketAddress. (:host con-info) (:port con-info))]
     (with-open [socket-chan (SocketChannel/open socket-addr)]
-      (let
-          [write-buf (ByteBuffer/wrap (.getBytes message "UTF-8"))
-            read-buf (ByteBuffer/allocate 1024)]
-        (send-on-sock socket-chan message)
-        (read-from-sock socket-chan)))))
+      (send-on-sock socket-chan message)
+      (read-from-sock socket-chan))))
 
 (defn send-message
   [con-info message]
@@ -69,3 +66,6 @@
     (if success
       (println "send message succeeded.")
       (println "send message failed."))))
+
+;;(def msg "{ \"topic\": \"TOPIC\", \"payload_size\": 7, \"checksum\": \"5116e40694ac48f654cb7b6816177e0e717237c6\"}message")
+;;(send-message {:host "localhost" :port 7878} msg)

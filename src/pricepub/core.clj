@@ -8,9 +8,9 @@
 (def con-info {:host "127.0.0.1" :port 7878})
 
 ;;sample data to play with
-(def sample-payload-map {:topic "TOPIC" :payload_size 13 :checksum "shalskdjlkjsl"})
-(def sample-payload "PAYLOAD_BYTES")
-(def sample-message {:header (json/write-str sample-payload-map) :payload sample-payload})
+;;(def sample-payload-map {:topic "TOPIC" :payload_size 13 :checksum "shalskdjlkjsl"})
+;;(def sample-payload "PAYLOAD_BYTES")
+;;(def sample-message {:header (json/write-str sample-payload-map) :payload sample-payload})
 
 (defn get-message-otw-format
   "[map]
@@ -66,8 +66,25 @@
   (let [messages (create-messages topic payloads)]
     (send-messages con-info messages)))
 
-(defn -main [topic & payloads]
-  (on-topic-send-payloads topic payloads))
+(def publish "pub")
+(def subscribe "sub")
+
+(defn error-incorrect-arg
+  [arg]
+  (throw (RuntimeException.
+          (apply str "Valid first arguments are " publish " and "
+                 subscribe "." "you provided: " arg "."))))
+
+(defn -main
+  [behavior topic & payloads]
+  (cond
+    (.equalsIgnoreCase behavior publish)
+      (on-topic-send-payloads topic payloads)
+    (.equalsIgnoreCase behavior subscribe)
+      (socket/get-topics
+      {:con-info {:host "localhost" :port 8787}
+        :topic "{\"topics\":[\"TOPIC\"]}"})
+      :else (error-incorrect-arg behavior)))
 
 ;; sample arguments
 ;;(on-topic-send-payloads "TOPIC" (list "aphid" "beachball" "curmudgeon" "dillweed"))
