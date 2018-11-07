@@ -1,6 +1,5 @@
 (ns pricepub.subscribe
-  (:require [manifold.stream :as s]
-            [manifold.deferred :as d]
+  (:require [pricepub.socket :as socket]
             [clojure.data.json :as json]
             [clojure.java.io :refer [writer reader copy output-stream]])
   (:import (java.net InetSocketAddress)
@@ -31,12 +30,16 @@
 ;;                  (println "sent: stuff?" ))
 ;;                  (recur (rest messages))))))))))
 
+
 (defn subscribe-to
+  ;; this ReAAlllY breaks the abstraction.
+  ;; read-from-sock should just take connection info.
   [con-info topics]
   (let
-    [socket-addr (InetSocketAddress. (:host con-info) (:port con-info))]
+      [{host :host port :port} con-info
+       socket-addr (InetSocketAddress. host port)]
     (with-open [socket-chan (SocketChannel/open socket-addr)]
-      (pricepub.publish/send-on-sock socket-chan topics)
+      (socket/send-on-sock socket-chan topics)
       ;;(pricepub.publish/write-to-once con-info topics)
       (let [read-sock
             (future
@@ -44,7 +47,7 @@
                 (println "start loop")
                 (println
                  "message: "
-                 (pricepub.publish/read-from-sock socket-chan))
+                 (socket/read-from-sock socket-chan))
                 (println "end loop")
                 (recur)))]
         ;;(deref read-sock 30000 nil)
