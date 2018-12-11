@@ -30,16 +30,19 @@
 ;;                  (println "sent: stuff?" ))
 ;;                  (recur (rest messages))))))))))
 
+(defn encode-sub-message
+  [topics]
+  (json/write-str {:topics topics}))
 
 (defn subscribe-to
   ;; this ReAAlllY breaks the abstraction.
   ;; read-from-sock should just take connection info.
   [con-info topics]
   (let
-      [{host :host port :port} con-info
+      [{:keys [host port]} con-info
        socket-addr (InetSocketAddress. host port)]
     (with-open [socket-chan (SocketChannel/open socket-addr)]
-      (socket/send-on-sock socket-chan topics)
+      (socket/send-on-sock socket-chan (encode-sub-message topics))
       ;;(pricepub.publish/write-to-once con-info topics)
       (let [read-sock
             (future

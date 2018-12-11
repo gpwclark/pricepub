@@ -13,17 +13,17 @@
      (with-open [socket-chan (SocketChannel/open socket-addr)]
        (partial sock-fn socket-chan)))))
 
-(defmulti put
+(defmulti publish
   (fn [impl] (:impl impl)))
 
-(defmethod put :pricepub [impl]
+(defmethod publish :pricepub [impl]
   (let [{con-info :con-info
          topic :topic
          payloads :payloads} impl]
     ;;(pub/send-messages con-info messages)
     (pub/on-topic-send-payloads con-info topic payloads)))
 
-(defmethod put :aleph [impl]
+(defmethod publish :aleph [impl]
   (let [con-info (:con-info impl)
         messages (:messages impl)
         con (tcp/client con-info)
@@ -35,10 +35,10 @@
         (s/close!)
         (d/catch Exception fail))))
 
-(defmulti get-topics
+(defmulti subscribe
   (fn [impl] (:impl impl)))
 
-(defmethod get-topics :default [impl]
+(defmethod subscribe :default [impl]
   (let [con-info (:con-info impl)
-        topic (:topic impl)]
-    (sub/subscribe-to con-info topic)))
+        topics (:topic impl)]
+    (sub/subscribe-to con-info topics)))

@@ -5,7 +5,7 @@
 
 (defn get-socket-addr
   [con-info]
-  (let [{host :host port :port} con-info]
+  (let [{:keys [host port]} con-info]
     (InetSocketAddress. host port)))
 
 (defn send-on-sock

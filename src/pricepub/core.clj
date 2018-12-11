@@ -25,16 +25,16 @@
   [behavior topic & payloads]
   (cond
     (.equalsIgnoreCase behavior publish)
-    (api/put
+    (api/publish
      {:impl :pricepub :con-info pub-con-info
       :topic topic :payloads payloads})
       ;;(api/put {:impl :pricepub :con-info con-info :messages messages}))
     (.equalsIgnoreCase behavior subscribe)
-      (api/get-topics
+      (api/subscribe
       {:con-info sub-con-info
-        :topic "{\"topics\":[\"TOPIC\"]}"})
-        :else (error-incorrect-arg behavior)))
+        :topic (conj payloads topic)})
+    :else (error-incorrect-arg behavior)))
 
 ;; sample calls.
-;;(api/put pub-con-info "TOPIC" (list "aphid" "beachball" "curmudgeon" "dillweed"))
-;;(api/get-topics sub-con-info "{\"topics\":[\"TOPIC\"]}")
+;;(api/publish pub-con-info "TOPIC" (list "aphid" "beachball" "curmudgeon" "dillweed"))
+;;(api/subscribe sub-con-info "{\"topics\":[\"TOPIC\"]}")
