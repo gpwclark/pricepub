@@ -21,12 +21,20 @@
 
 (defn write-to
   [con-info messages]
-  (let [socket-addr (get-socket-addr con-info)]
-    (with-open [socket-chan (SocketChannel/open socket-addr)]
-      (loop [messages messages]
-       (when (not (nil? (first messages)))
-         (send-on-sock socket-chan (first messages))
-         (recur (rest messages)))))))
+    (let [socket-addr (get-socket-addr con-info)]
+      (with-open [socket-chan (SocketChannel/open socket-addr)]
+        (loop [messages messages]
+          (when (not (nil? (first messages)))
+            (send-on-sock socket-chan (first messages))
+            (recur (rest messages)))))))
+
+(defn write-once-with-socket
+  [socket-chan message]
+    (send-on-sock socket-chan message))
+
+(defn write-all
+  [con-info messages]
+  (let [socket-addr (get-socket-addr con-info)]))
 
 (defn read-from-sock
   [socket-chan]
@@ -40,14 +48,6 @@
               res-bytes (.get read-buf dst-array 0 position)
               clear-buf (.clear read-buf)]
           (String. dst-array))))))
-
-(defn write-to-once
-  [con-info message]
-  (let
-      [socket-addr (get-socket-addr con-info)]
-    (with-open [socket-chan (SocketChannel/open socket-addr)]
-      (send-on-sock socket-chan message)
-      (read-from-sock socket-chan))))
 
 (defn write-to-once
   [con-info message]

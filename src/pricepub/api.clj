@@ -21,7 +21,8 @@
          topic :topic
          payloads :payloads} impl]
     ;;(pub/send-messages con-info messages)
-    (pub/on-topic-send-payloads con-info topic payloads)))
+    ;;(pub/on-topic-send-payloads con-info topic payloads)))
+    (pub/on-topic-send-payloads-abstr con-info topic payloads)))
 
 (defmethod put :aleph [impl]
   (let [con-info (:con-info impl)

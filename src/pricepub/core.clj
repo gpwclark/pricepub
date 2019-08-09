@@ -36,5 +36,6 @@
         :else (error-incorrect-arg behavior)))
 
 ;; sample calls.
-;;(api/put pub-con-info "TOPIC" (list "aphid" "beachball" "curmudgeon" "dillweed"))
+(api/put {:impl :pricepub :con-info pub-con-info
+          :topic "TOPIC" :payloads (list "aphid" "beachball" "curmudgeon" "dillweed")})
 ;;(api/get-topics sub-con-info "{\"topics\":[\"TOPIC\"]}")

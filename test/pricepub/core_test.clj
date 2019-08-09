@@ -1,3 +1,4 @@
+
 (ns pricepub.core-test
   (:require [clojure.test :refer :all]
             [pricepub.core :refer :all]))
